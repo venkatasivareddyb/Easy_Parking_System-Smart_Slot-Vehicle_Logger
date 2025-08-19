@@ -1,0 +1,111 @@
+/* General UI */
+body {
+    background-color: #f9f9f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+.card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.btn-custom {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Slot status coloring */
+.slot-status {
+    padding: 4px 10px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+}
+.available {
+    background-color: #28a745;
+}
+.occupied {
+    background-color: #dc3545;
+}
+
+/* Image preview */
+#image-preview {
+    display: none;
+    max-width: 200px;
+    margin-top: 10px;
+}
+/* Hide company form initially */
+#companyForm {
+    display: none;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+        width: 50%;
+    margin-left: 20%;
+    margin-bottom: 45px;
+}
+/* User Dashboard Entry Form */
+.entry-form-section {
+    display: none;
+    padding: 20px;
+    background-color: #f0f2f5;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+.profile-section {
+  margin-top: 20px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  max-width: 420px;
+  transition: all 0.3s ease-in-out;
+}
+
+.profile-section h4 {
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.profile-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #555;
+}
+
+.profile-section input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fdfdfd;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.profile-section input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.profile-section button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.profile-section button:hover {
+  background-color: #0056b3;
+}
+
+.modal-body label {
+  font-weight: 500;
+}
+
+
+

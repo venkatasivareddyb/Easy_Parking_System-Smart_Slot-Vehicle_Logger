@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#entryModal">➕ Make Entry</button>
+    <div>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#profileModal">👤 My Profile</button>
+    </div>
+</div>
+
+<!-- 🚗 Slot Summary Table -->
+<h3>🚗 Slot Summary</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr><th>Type</th><th>Available</th><th>Occupied</th><th>Cost</th></tr>
+    </thead>
+    <tbody>
+        {% for type in ['Car', 'Bike'] %}
+        <tr>
+            <td>{{ type }}</td>
+            <td>{{ slot_summary[type]['available'] }}</td>
+            <td>{{ slot_summary[type]['occupied'] }}</td>
+            <td>₹{{ cost_summary[type] }}</td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 📄 Parking Logs Table -->
+<h3 class="mt-4">📄 Parking Logs</h3>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th><th>Cid</th><th>Type</th><th>Vehicle Number</th><th>In Time</th><th>Out Time</th><th>Time (hrs)</th><th>Amount (₹)</th><th>Action</th><th>QR Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.id }}</td>
+            <td>{{ log.cid }}</td>
+            <td>{{ log.vehicle_type }}</td>
+            <td>{{ log.vehicle_number or '--' }}</td>
+            <td>{{ log.entry_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ log.exit_time.strftime('%Y-%m-%d %H:%M') if log.exit_time else '--' }}</td>
+            <td>{{ log.duration if log.duration else '--' }}</td>
+            <td>{{ log.amount if log.amount else '--' }}</td>
+            <td>
+                {% if not log.exit_time %}
+                <form method="POST" action="{{ url_for('exit_vehicle') }}">
+                    <input type="hidden" name="slot_id" value="{{ log.slot_id }}">
+                    <button type="submit" class="btn btn-sm btn-danger">Exit</button>
+                </form>
+                {% else %}
+                ✅
+                {% endif %}
+            </td>
+            <td>
+              {% if log.amount != '--' and log.qr_path %}
+              <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#qrModal{{ log.id }}">
+                 Pay Now
+              </button>
+              <!-- Modal -->
+              <div class="modal fade" id="qrModal{{ log.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ log.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content text-center">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="qrModalLabel{{ log.id }}">Pay ₹{{ log.amount }}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Scan with UPI app</p>
+                      <img src="{{ url_for('static', filename='qrcodes/payment_qr_' ~ log.id ~ '.png') }}" alt="QR Code" style="max-width: 300px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+           {% else %}
+            <span class="text-muted">N/A</span>
+           {% endif %}
+          </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- ✅ PROFILE MODAL -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">👤 Profile Info</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('update_profile') }}">
+        
+          <p><strong>Company:</strong> {{ current_user.company_name }}</p>
+          <p><strong>Email:</strong> {{ current_user.email }}</p>
+
+          <hr>
+          <h6>Edit Username/Password</h6>
+          <div class="mb-2">
+            <label>New Username:</label>
+            <input class="form-control" name="new_username" value="{{ current_user.username }}">
+          </div>
+          <div class="mb-2">
+            <label>New Password:</label>
+            <input class="form-control" type="password" name="new_password">
+          </div>
+          <div class="mb-3">
+            <label>Confirm Password:</label>
+            <input class="form-control" type="password" name="confirm_password">
+          </div>
+
+          <button type="submit" class="btn btn-primary">💾 Update Profile</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ ENTRY MODAL -->
+<div class="modal fade" id="entryModal" tabindex="-1" aria-labelledby="entryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">➕ New Vehicle Entry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('entry') }}" enctype="multipart/form-data">
+          <div class="mb-2">
+            <label>Vehicle Type</label>
+            <select name="vehicle_type" class="form-control" required>
+              <option value="Car">Car</option>
+              <option value="Bike">Bike</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Number Plate Image</label>
+            <input type="file" name="plate_image" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-success mt-2">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+                                                                                                      
+<!-- ✅ FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="alert alert-{{ cat }} mt-3">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}
